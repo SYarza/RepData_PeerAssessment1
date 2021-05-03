@@ -7,13 +7,7 @@ output:
     keep_md: true 
 ---
 
-```{r setup, include=FALSE}
 
-knitr::opts_chunk$set(echo = TRUE)
-
-knitr::opts_chunk$set( fig.path = "figures/")
-
-```
 
 # Activity monitoring analysis
 
@@ -23,7 +17,8 @@ This is an analysis of the data frame "activity monitoring", which counts the nu
 
 First, we have to load the data into an R data frame:
 
-```{r}
+
+```r
 master <- as.character(unzip("activity.zip", list = TRUE)$Name)
 df <- read.csv(unz("activity.zip", "activity.csv")) 
 ```
@@ -32,33 +27,48 @@ df <- read.csv(unz("activity.zip", "activity.csv"))
 
 Now we turn to the question of what is the mean of the total steps taken by day. First, we make a table to sum the steps taken on every interval during each day:
 
-```{r}
+
+```r
 steps_day<-with(df,tapply(steps,date,sum,na.rm=TRUE))
 ```
 
 With these table, we plot a histogram of the total number of steps by day:
 
-```{r}
+
+```r
 hist(steps_day,xlab="Steps in a day",main="Histogram of total steps on a single day")
 ```
 
+![](figures/unnamed-chunk-3-1.png)<!-- -->
+
 Then, we can compute the mean of total steps taken by day:
 
-```{r}
+
+```r
 mean(steps_day)
+```
+
+```
+## [1] 9354.23
 ```
 
 and the median:
 
-```{r}
+
+```r
 median(steps_day)
+```
+
+```
+## [1] 10395
 ```
 
 ## Average daily activity pattern
 
 Now we plot a time series in which we see the variation on the number of steps by each 5-minute interval across all the days in the data frame:
 
-```{r,warning=FALSE,message=FALSE}
+
+```r
 library(dplyr)
 
 df<-df%>%
@@ -74,9 +84,12 @@ with(newdf,plot(n,mean_int,type="l",xlab="Intervals",ylab="Mean of steps across 
                 main="Time series of mean number of steps by interval"))
 ```
 
+![](figures/unnamed-chunk-6-1.png)<!-- -->
+
 The 5-minute interval which, in average has the most activity across all days is the interval starting at:
 
-```{r, warning=FALSE,message=FALSE}
+
+```r
 library(lubridate)
 
 maxSteps<-max(newdf$mean_int)
@@ -86,23 +99,38 @@ max_inter<-paste(hour(max_inter),minute(max_inter),sep=":")
 max_inter
 ```
 
+```
+## [1] "8:35"
+```
+
 and the average number of steps taken in that interval is:
 
-```{r}
+
+```r
 maxSteps
+```
+
+```
+## [1] 206.1698
 ```
 
 ##Handling missing values
 
 The dataset has the following number of missing values:
 
-```{r}
+
+```r
 sum(is.na(df$steps))
+```
+
+```
+## [1] 2304
 ```
 
 We will change this NA values in the data set by replacing them with the mean of the corresponding interval across all days:
 
-```{r}
+
+```r
 df2<-df
 for (i in seq_along(df$steps)) {
   if (is.na(df$steps[i])){
@@ -113,21 +141,34 @@ for (i in seq_along(df$steps)) {
 
 This is an histogram of the total steps in a single day in the resulting data frame:
 
-```{r}
+
+```r
 steps_day2<-with(df2,tapply(steps,date,sum,na.rm=TRUE))
 hist(steps_day2,xlab="Steps in a day",main="Histogram of total steps on a single day")
 ```
 
+![](figures/unnamed-chunk-11-1.png)<!-- -->
+
 Now we calculate the mean of steps in a day for this new data set:
 
-```{r}
+
+```r
 mean(steps_day2)
+```
+
+```
+## [1] 10766.19
 ```
 
 and its median:
 
-```{r}
+
+```r
 median(steps_day2)
+```
+
+```
+## [1] 10766.19
 ```
 
 Notice that both the mean and the median increased with respect to those for the original dataset. Also, the mean and the median are equal for this dataset. That could be because there are several days which are full of NA's, and therefore they are full of means in the new dataset, so that the mean of steps in a day is the total number of steps in several days in the new dataset.
@@ -136,7 +177,8 @@ Notice that both the mean and the median increased with respect to those for the
 
 Finally we analize the different patterns in the time series plots for weekdays and weekends. First, we add a variable in the data frame that identifies the kind of day:
 
-```{r}
+
+```r
 df<-df%>%
   mutate(day=ymd(date))%>%
   mutate(day=weekdays(day))
@@ -152,7 +194,8 @@ for (i in seq_along(df$day)) {
 
 Now we take the average of steps taken on each interval across all weekdays and across all weekends:
 
-```{r,message=FALSE}
+
+```r
 dfid<-df%>%
   group_by(interval,day)%>%
   summarise(steps=mean(steps,na.rm=TRUE))
@@ -160,8 +203,17 @@ dfid<-df%>%
 
 And here are both plots:
 
-```{r,message=FALSE}
-library(ggplot2)
 
+```r
+library(ggplot2)
+```
+
+```
+## Warning: package 'ggplot2' was built under R version 3.6.3
+```
+
+```r
 ggplot(dfid,aes(interval,steps))+geom_line()+facet_grid(day~.)
 ```
+
+![](figures/unnamed-chunk-16-1.png)<!-- -->
